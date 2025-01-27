@@ -16,7 +16,7 @@ const comandaRoutes = require('./routes/comanda.routes')
 const app = express();
 
 
-app.use(cors()) //Permitimos las conexiones cruzadas con el frontend, no usar en produccion
+app.use(cors())
 app.use(express.json())
 
 
