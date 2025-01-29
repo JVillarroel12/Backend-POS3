@@ -1,32 +1,58 @@
 const { pool } = require("../config/db");
 
 const getAllCategories = async () => {
-  const [rows] = await pool.query("SELECT * FROM CATEGORIES");
-  return rows;
+  const [categories] = await pool.query("select * from categories");
+
+  const categoriesWithProducts = await Promise.all(
+    categories.map(async (category) => {
+      const [products] = await pool.query(
+        `
+        select 
+            products.*
+        from products
+        where products.category_id = ?
+        `,
+        [category.category_id]
+      );
+      const mappedProducts = products.map((row) => {
+        return {
+          ...row,
+          price: Number(row.price),
+          price_ref: Number(row.price_ref),
+        };
+      });
+      return {
+        ...category,
+        products: mappedProducts,
+      };
+    })
+  );
+
+  return categoriesWithProducts;
 };
 
 const getCategoryById = async (id) => {
   const [rows] = await pool.query(
-    "SELECT * FROM CATEGORIES WHERE CATEGORY_ID = ?",
+    "select * from categories where category_id = ?",
     [id]
   );
   return rows[0];
 };
 
 const createCategory = async (categoryData) => {
-  const { name, disabled, image_path } = categoryData;
+  const { name, active, image_path } = categoryData;
   const [result] = await pool.query(
-    "INSERT INTO CATEGORIES (NAME, DISABLED, IMAGE_PATH) VALUES (?, ?, ?)",
-    [name, disabled, image_path]
+    "insert into categories (name, active, image_path) values (?, ?, ?)",
+    [name, active, image_path]
   );
   return { CATEGORY_ID: result.insertId, ...categoryData };
 };
 
 const updateCategory = async (id, categoryData) => {
-  const { NAME, DISABLED, IMAGE_PATH } = categoryData;
+  const { name, active, image_path } = categoryData;
   const [result] = await pool.query(
-    "UPDATE CATEGORIES SET NAME = ?, DISABLED = ?, IMAGE_PATH = ? WHERE CATEGORY_ID = ?",
-    [NAME, DISABLED, IMAGE_PATH, id]
+    "update categories set name = ?, active = ?, image_path = ? where category_id = ?",
+    [name, active, image_path, id]
   );
   if (result.affectedRows === 0) {
     return null; // No se encontró la categoría para actualizar
@@ -36,7 +62,7 @@ const updateCategory = async (id, categoryData) => {
 
 const deleteCategory = async (id) => {
   const [result] = await pool.query(
-    "DELETE FROM CATEGORIES WHERE CATEGORY_ID = ?",
+    "delete from categories where category_id = ?",
     [id]
   );
   return result.affectedRows > 0;
