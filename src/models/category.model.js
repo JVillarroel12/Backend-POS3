@@ -19,6 +19,7 @@ const getAllCategories = async () => {
           ...row,
           price: Number(row.price),
           price_ref: Number(row.price_ref),
+          qty: Number(row.qty),
         };
       });
       return {
@@ -57,7 +58,7 @@ const updateCategory = async (id, categoryData) => {
   if (result.affectedRows === 0) {
     return null; // No se encontró la categoría para actualizar
   }
-  return { CATEGORY_ID: id, ...categoryData };
+  return { category_id: id, ...categoryData };
 };
 
 const deleteCategory = async (id) => {

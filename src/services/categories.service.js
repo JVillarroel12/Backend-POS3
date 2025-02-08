@@ -10,12 +10,7 @@ const createCategory = async (categoryData) => {
   return await Category.createCategory(categoryData);
 };
 const updateCategory = async (id, categoryData) => {
-  const category = await Category.updateCategory(id);
-  if (!category) {
-    return null;
-  }
-  await category.update(categoryData);
-  return category;
+  return await Category.updateCategory(id, categoryData);
 };
 const deleteCategory = async (id) => {
   const category = await Category.deleteCategory(id);

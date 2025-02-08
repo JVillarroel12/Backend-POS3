@@ -43,6 +43,7 @@ const updateCategory = async (req, res) => {
     }
     res.json(updatedCategory);
   } catch (error) {
+    console.error("Error in updateCategory controller", error); // Agrega este log
     res.status(500).json({ error: error.message });
   }
 };
