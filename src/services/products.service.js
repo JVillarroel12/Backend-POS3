@@ -10,12 +10,7 @@ const createProduct = async (productData) => {
   return await Product.createProduct(productData);
 };
 const updateProduct = async (id, productData) => {
-  const product = await Product.updateProduct(id);
-  if (!product) {
-    return null;
-  }
-  await product.update(productData);
-  return product;
+  return await Product.updateProduct(id, productData);
 };
 const deleteProduct = async (id) => {
   const product = await Product.deleteProduct(id);

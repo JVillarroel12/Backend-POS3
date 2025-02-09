@@ -2,14 +2,14 @@ const { pool } = require("../config/db");
 
 const getAllProducts = async () => {
   const [rows] = await pool.query(`
-      SELECT 
+      select 
           products.*,
           categories.category_id as category_category_id,
           categories.name as category_name,
           categories.active as category_active,
           categories.image_path as category_image_path
-      FROM products
-      INNER JOIN categories ON products.category_id = categories.category_id
+      from products
+      inner join categories on products.category_id = categories.category_id
     `);
   return rows
     .map((row) => {
@@ -17,9 +17,7 @@ const getAllProducts = async () => {
         ...row,
         price: Number(row.price),
         price_ref: Number(row.price_ref),
-        qty: Number(row.qty),
         use_additional: Boolean(row.use_additional),
-        description: row.description,
         category: {
           category_id: row.category_category_id,
           name: row.category_name,
@@ -43,15 +41,15 @@ const getAllProducts = async () => {
 const getProductById = async (id) => {
   const [rows] = await pool.query(
     `
-      SELECT 
+      select 
           products.*,
           categories.category_id as category_category_id,
           categories.name as category_name,
           categories.active as category_active,
           categories.image_path as category_image_path
-      FROM products
-      INNER JOIN categories ON products.category_id = categories.category_id
-      WHERE products.product_id = ?
+      from products
+      inner join categories on products.category_id = categories.category_id
+      where products.product_id = ?
     `,
     [id]
   );
@@ -64,7 +62,6 @@ const getProductById = async (id) => {
     price: Number(row.price),
     price_ref: Number(row.price_ref),
     use_additional: Boolean(row.use_additional),
-    description: row.description,
     category: {
       category_id: row.category_category_id,
       name: row.category_name,

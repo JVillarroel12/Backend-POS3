@@ -1,4 +1,5 @@
 const Conversion = require("../models/conversion.model");
+const Product = require("../models/product.model");
 
 const getAllConversions = async () => {
   return await Conversion.getAllConversions();
@@ -13,7 +14,35 @@ const createConversion = async (conversionData) => {
 };
 
 const updateConversion = async (id, conversionData) => {
-  return await Conversion.updateConversion(id, conversionData);
+  const updatedConversion = await Conversion.updateConversion(
+    id,
+    conversionData
+  );
+
+  if (!updatedConversion) {
+    return null;
+  }
+
+  const newRate = Number(updatedConversion.rate);
+
+  const products = await Product.getAllProducts();
+
+  const updatedProducts = await Promise.all(
+    products.map(async (product) => {
+      const newPrice = Number(product.price_ref) * newRate;
+      const updatedProductData = {
+        ...product,
+        price: newPrice,
+      };
+      await Product.updateProduct(product.product_id, updatedProductData);
+      return {
+        ...product,
+        price: newPrice,
+      };
+    })
+  );
+
+  return updatedConversion;
 };
 
 const deleteConversion = async (id) => {

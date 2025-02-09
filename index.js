@@ -11,6 +11,9 @@ const modifierRoutes = require("./src/routes/modifiers.routes");
 const stationRoutes = require("./src/routes/stations.routes");
 const paymentMethodRoutes = require("./src/routes/payment_methods.routes");
 const conversionRoutes = require("./src/routes/conversion.routes");
+const comandaRoutes = require("./src/routes/comandas.routes");
+const zoneRoutes = require("./src/routes/zones.routes");
+const tableRoutes = require("./src/routes/tables.routes");
 
 const PORT = process.env.PORT || 3000;
 
@@ -26,6 +29,9 @@ app.use("/stations", stationRoutes);
 app.use("/currencies", currencyRoutes);
 app.use("/payment-methods", paymentMethodRoutes);
 app.use("/conversions", conversionRoutes);
+app.use("/comandas", comandaRoutes);
+app.use("/zones", zoneRoutes);
+app.use("/tables", tableRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
