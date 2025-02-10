@@ -30,7 +30,15 @@ const createComanda = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
+const getAllComandasByBillId = async (req, res) => {
+  try {
+    const billId = parseInt(req.params.billId);
+    const comandas = await comandaService.getAllComandasByBillId(billId);
+    res.json(comandas);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const createComandas = async (req, res) => {
   try {
     const comandasData = req.body.data;
@@ -63,7 +71,22 @@ const updateComanda = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const updateComandaStatus = async (req, res) => {
+  console.log("REQ =>", req.body);
 
+  try {
+    const comandaId = parseInt(req.params.id);
+    const estado = req.body;
+    const updated = await comandaService.updateComandaStatus(comandaId, estado);
+    if (updated) {
+      res.json({ message: "Comanda status updated successfully" });
+    } else {
+      res.status(404).json({ message: "Comanda not found" });
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
 const deleteComanda = async (req, res) => {
   try {
     const comandaId = parseInt(req.params.id);
@@ -84,4 +107,6 @@ module.exports = {
   updateComanda,
   deleteComanda,
   createComanda,
+  getAllComandasByBillId,
+  updateComandaStatus,
 };

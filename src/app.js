@@ -1,5 +1,13 @@
 const express = require("express");
 const cors = require("cors");
+
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+const { initIO, getIO } = require("./socket"); // Importa las funciones de Socket.IO
+
+const server = createServer(app); // Crea el servidor HTTP
+initIO(server);
+
 const categoryRoutes = require("./routes/category.routes");
 const authRoutes = require("./routes/auth.routes");
 const productRoutes = require("./routes/product.routes");
@@ -11,7 +19,7 @@ const billRoutes = require("./routes/bill.routes");
 const currencyRoutes = require("./routes/currency.routes");
 const paymentMethodRoutes = require("./routes/payment_method.routes");
 const comandaRoutes = require("./routes/comanda.routes");
-const errorHandler = require("./middlewares/error.middleware"); // Importa el middleware
+const errorHandler = require("./middlewares/error.middleware");
 
 const app = express();
 
@@ -39,4 +47,4 @@ app.use("/api/users", authenticate, userRoutes);
 
 app.use("/api/auth", authRoutes);
 // ?
-module.exports = app;
+module.exports = { app, server };

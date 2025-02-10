@@ -7,7 +7,13 @@ const getAllTables = async () => {
 const getTableById = async (id) => {
   return await Table.getTableById(id);
 };
-
+const getTableByCodTable = async (codTable) => {
+  const table = await Table.getTableByCodTable(codTable);
+  if (!table) {
+    throw new Error("No existe la mesa");
+  }
+  return table;
+};
 const createTable = async (tableData) => {
   return await Table.createTable(tableData);
 };
@@ -26,4 +32,5 @@ module.exports = {
   createTable,
   updateTable,
   deleteTable,
+  getTableByCodTable,
 };

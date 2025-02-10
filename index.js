@@ -1,7 +1,11 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+const http = require("http");
+const { initIO, getIO } = require("./socket");
+
 const app = express();
+
 const categoriesRoutes = require("./src/routes/categories.routes");
 const productRoutes = require("./src/routes/products.routes");
 const clientRoutes = require("./src/routes/clients.routes");
@@ -33,6 +37,9 @@ app.use("/comandas", comandaRoutes);
 app.use("/zones", zoneRoutes);
 app.use("/tables", tableRoutes);
 
-app.listen(PORT, () => {
+const server = http.createServer(app);
+initIO(server);
+
+server.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });

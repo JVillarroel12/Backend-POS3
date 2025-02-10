@@ -36,7 +36,18 @@ const createTable = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
-
+const getTableByCodTable = async (req, res) => {
+  try {
+    const codTable = req.params.codTable;
+    const table = await tableService.getTableByCodTable(codTable);
+    res.json(table);
+  } catch (error) {
+    if (error.message === "No existe la mesa") {
+      return res.status(404).json({ message: error.message });
+    }
+    res.status(500).json({ error: error.message });
+  }
+};
 const updateTable = async (req, res) => {
   try {
     const tableId = parseInt(req.params.id);
@@ -69,4 +80,5 @@ module.exports = {
   createTable,
   updateTable,
   deleteTable,
+  getTableByCodTable,
 };

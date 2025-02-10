@@ -42,7 +42,38 @@ const getTableById = async (id) => {
   ]);
   return rows[0];
 };
+const getTableByCodTable = async (codTable) => {
+  const [rows] = await pool.query(
+    `
+      SELECT 
+          tables.*,
+          zone.zone_id AS zone_zone_id,
+          zone.name AS zone_name,
+          zone.active AS zone_active,
+          zone.date_creation AS zone_date_creation
+      FROM tables
+      INNER JOIN zone ON tables.zone_id = zone.zone_id
+      WHERE tables.cod_table = ?
+  `,
+    [codTable]
+  );
 
+  if (!rows || rows.length === 0) {
+    return null;
+  }
+
+  const row = rows[0];
+
+  return {
+    ...row,
+    zone: {
+      zone_id: row.zone_zone_id,
+      name: row.zone_name,
+      active: row.zone_active,
+      date_creation: row.zone_date_creation,
+    },
+  };
+};
 const createTable = async (tableData) => {
   const { zone_id, name, active, cod_table } = tableData;
   try {
@@ -86,4 +117,5 @@ module.exports = {
   createTable,
   updateTable,
   deleteTable,
+  getTableByCodTable,
 };
