@@ -1,10 +1,31 @@
 const { pool } = require("../config/db");
+const fs = require("fs").promises;
+const path = require("path");
 
 const getAllCategories = async () => {
   const [categories] = await pool.query("select * from categories");
 
   const categoriesWithProducts = await Promise.all(
     categories.map(async (category) => {
+      let imageBase64 = null;
+      if (category.image_path) {
+        try {
+          const imagePath = path.join(
+            __dirname,
+            "../../img/categories",
+            category.image_path
+          );
+          const imageBuffer = await fs.readFile(imagePath);
+          imageBase64 = `data:image/jpeg;base64,${imageBuffer.toString(
+            "base64"
+          )}`;
+        } catch (error) {
+          console.error(
+            `Error reading image for category ${category.category_id}:`,
+            error
+          );
+        }
+      }
       const [products] = await pool.query(
         `
         select 
@@ -14,16 +35,41 @@ const getAllCategories = async () => {
         `,
         [category.category_id]
       );
-      const mappedProducts = products.map((row) => {
-        return {
-          ...row,
-          price: Number(row.price),
-          price_ref: Number(row.price_ref),
-          qty: Number(row.qty),
-        };
-      });
+      const mappedProducts = await Promise.all(
+        products.map(async (row) => {
+          let productImageBase64 = null;
+          if (row.image_path) {
+            try {
+              const imagePath = path.join(
+                __dirname,
+                "../../img/products",
+                row.image_path
+              );
+              const imageBuffer = await fs.readFile(imagePath);
+              productImageBase64 = `data:image/jpeg;base64,${imageBuffer.toString(
+                "base64"
+              )}`;
+            } catch (error) {
+              console.error(
+                `Error reading image for product ${row.product_id}:`,
+                error
+              );
+            }
+          }
+
+          return {
+            ...row,
+            price: Number(row.price),
+            price_ref: Number(row.price_ref),
+            qty: Number(row.qty),
+            image: productImageBase64,
+          };
+        })
+      );
+
       return {
         ...category,
+        image: imageBase64,
         products: mappedProducts,
       };
     })

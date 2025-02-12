@@ -1,4 +1,6 @@
 const { pool } = require("../config/db");
+const fs = require("fs").promises;
+const path = require("path");
 
 const getAllComandas = async () => {
   const [rows] = await pool.query(
@@ -53,6 +55,25 @@ const getAllComandasByBillId = async (billId) => {
   // Para cada comanda, obtén sus adicionales
   const comandasConAdicionales = await Promise.all(
     comandas.map(async (comanda) => {
+      let imageBase64 = null;
+      if (comanda.image_path) {
+        try {
+          const imagePath = path.join(
+            __dirname,
+            "../../img/products",
+            comanda.image_path
+          );
+          const imageBuffer = await fs.readFile(imagePath);
+          imageBase64 = `data:image/jpeg;base64,${imageBuffer.toString(
+            "base64"
+          )}`;
+        } catch (error) {
+          console.error(
+            `Error reading image for comanda ${comanda.comanda_id}:`,
+            error
+          );
+        }
+      }
       const [additionals] = await pool.query(
         `
           SELECT
@@ -64,17 +85,43 @@ const getAllComandasByBillId = async (billId) => {
       `,
         [comanda.comanda_id]
       );
-      const parsedAdditionals = additionals.map((additional) => ({
-        ...additional,
-        price: Number(additional.price),
-        price_ref: Number(additional.price_ref),
-        image_path: additional.image_path,
-      }));
+      const parsedAdditionals = await Promise.all(
+        additionals.map(async (additional) => {
+          let additionalImageBase64 = null;
+          if (additional.image_path) {
+            try {
+              const imagePath = path.join(
+                __dirname,
+                "../../img/products",
+                additional.image_path
+              );
+              const imageBuffer = await fs.readFile(imagePath);
+              additionalImageBase64 = `data:image/jpeg;base64,${imageBuffer.toString(
+                "base64"
+              )}`;
+            } catch (error) {
+              console.error(
+                `Error reading image for additional ${additional.comanda_additional_id}:`,
+                error
+              );
+            }
+          }
+
+          return {
+            ...additional,
+            price: Number(additional.price),
+            price_ref: Number(additional.price_ref),
+            image_path: additional.image_path,
+            image: additionalImageBase64,
+          };
+        })
+      );
       return {
         ...comanda,
-        price: Number(comanda.price),
-        price_ref: Number(comanda.price_ref),
+        price: Number(comanda.price), // Convertir price a número
+        price_ref: Number(comanda.price_ref), // Convertir price_ref a número
         image_path: comanda.image_path,
+        image: imageBase64,
         additionals: parsedAdditionals || [],
       };
     })
