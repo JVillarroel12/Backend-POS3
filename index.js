@@ -18,6 +18,10 @@ const conversionRoutes = require("./src/routes/conversion.routes");
 const comandaRoutes = require("./src/routes/comandas.routes");
 const zoneRoutes = require("./src/routes/zones.routes");
 const tableRoutes = require("./src/routes/tables.routes");
+const userRoutes = require("./src/routes/users.routes");
+const profileRoutes = require("./src/routes/profiles.routes");
+const userActionRoutes = require("./src/routes/user_actions.routes");
+const profileActionRoutes = require("./src/routes/profile_actions.routes");
 
 const PORT = process.env.PORT || 3000;
 
@@ -38,7 +42,10 @@ app.use("/conversions", conversionRoutes);
 app.use("/comandas", comandaRoutes);
 app.use("/zones", zoneRoutes);
 app.use("/tables", tableRoutes);
-
+app.use("/users", userRoutes);
+app.use("/profiles", profileRoutes);
+app.use("/user-actions", userActionRoutes);
+app.use("/profile-actions", profileActionRoutes);
 const server = http.createServer(app);
 initIO(server);
 
