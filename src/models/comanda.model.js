@@ -300,37 +300,63 @@ const getStatus = async () => {
           t.table_id AS table_table_id,
           t.name AS table_name,
           z.zone_id AS zone_zone_id,
-          z.name AS zone_name
+          z.name AS zone_name,
+          p.image_path AS product_image_path
       FROM
           comandas c
       INNER JOIN bills b ON c.bill_id = b.bill_id
       INNER JOIN tables t ON b.table_id = t.table_id
       INNER JOIN zone z ON t.zone_id = z.zone_id
+      INNER JOIN products p ON c.product_id = p.product_id
       WHERE c.status = ?
   `,
       [estado]
     );
-    return comandas.map((comanda) => {
-      const {
-        table_table_id,
-        table_name,
-        zone_zone_id,
-        zone_name,
-        ...comandaData
-      } = comanda;
-      return {
-        ...comandaData,
-        modifiers: comanda.modifiers,
-        table: {
-          table_id: table_table_id,
-          name: table_name,
-        },
-        zone: {
-          zone_id: zone_zone_id,
-          name: zone_name,
-        },
-      };
-    });
+
+    return await Promise.all(
+      comandas.map(async (comanda) => {
+        const {
+          table_table_id,
+          table_name,
+          zone_zone_id,
+          zone_name,
+          product_image_path,
+          ...comandaData
+        } = comanda;
+        let imageBase64 = null;
+        try {
+          if (product_image_path) {
+            const imagePath = path.join(
+              __dirname,
+              "../../img/products",
+              comanda.product_image_path
+            );
+            const imageBuffer = await fs.readFile(imagePath);
+            imageBase64 = `data:image/jpeg;base64,${imageBuffer.toString(
+              "base64"
+            )}`;
+          }
+        } catch (error) {
+          console.error(
+            `Error reading image for comanda ${comanda.comanda_id}:`,
+            error
+          );
+        }
+        return {
+          ...comandaData,
+          modifiers: comanda.modifiers,
+          table: {
+            table_id: table_table_id,
+            name: table_name,
+          },
+          zone: {
+            zone_id: zone_zone_id,
+            name: zone_name,
+          },
+          image_path: imageBase64,
+        };
+      })
+    );
   };
 
   comandasStatus.waiting = await getComandasWithDetails("waiting");

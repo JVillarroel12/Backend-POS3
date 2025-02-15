@@ -1,15 +1,7 @@
-const express = require('express');
-const authController = require('../controllers/auth.controller');
-const { body } = require('express-validator')
-
+const express = require("express");
 const router = express.Router();
+const authController = require("../controllers/auth.controller");
 
-router.post(
-    '/login', 
-    [body('user').notEmpty().isString(), body('password').notEmpty().isString()], 
-    authController.login
-);
+router.post("/login", authController.authenticateUser);
 
-router.post('/register', [body('user').notEmpty().isString(),body('password').notEmpty().isString()], authController.createUser);
-  
 module.exports = router;

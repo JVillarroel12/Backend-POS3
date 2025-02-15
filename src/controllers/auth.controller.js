@@ -1,50 +1,23 @@
-const authService = require('../../src/services/auth.service');
-const { validationResult } = require('express-validator');
+const authService = require("../services/auth.service");
 
-const login = async (req, res) => {
-    //Validaciones con Express validator
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ errors: errors.array(), message: 'Username or Password are invalid' });
-      }
-
+const authenticateUser = async (req, res) => {
+  try {
     const { user, password } = req.body;
 
-    try {
-        const response = await authService.loginUser({user, password})
-        
-      if(!response.success){
-            return res.status(401).json({ ...response });
-        }
-      
-      res.json(response);
+    // 1. Autenticar al usuario
+    const userDetails = await authService.authenticateUser({ user, password });
 
-    } catch (error) {
-       console.log(error)
-        res.status(500).json({ success: false, message: 'Error del Servidor Contacte al adminstrador' });
+    if (!userDetails) {
+      return res.status(404).json({ message: "Credenciales inválidas" });
     }
+    // 2. Devolver la información del usuario
+    return res.status(200).json(userDetails);
+  } catch (error) {
+    console.error("Error in authenticateUser controller", error);
+    res.status(404).json({ message: error.message });
+  }
 };
 
-const createUser = async (req, res) => {
-    
-        //Validaciones con Express validator
-        const errors = validationResult(req)
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-    const { user, password } = req.body;
-
-    try {
-         const response = await authService.createUser({user, password})
-      res.status(201).json(response);
-    } catch (error) {
-        console.log(error)
-       res.status(500).json({ success: false, message: 'Error del Servidor Contacte al administrador' });
-    }
-};
-  
 module.exports = {
-    login,
-    createUser
+  authenticateUser,
 };

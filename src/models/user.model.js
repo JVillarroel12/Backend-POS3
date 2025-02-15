@@ -2,14 +2,37 @@ const { pool } = require("../config/db");
 
 const getAllUsers = async () => {
   const [rows] = await pool.query(`
-        SELECT 
-            users.*,
-            profiles.name as profile_name,
-            profiles.profile_id as profile_profile_id
-        FROM users
-        LEFT JOIN profiles ON users.profile_id = profiles.profile_id
-    `);
-  return rows;
+    SELECT 
+      users.*,
+      profiles.profile_id AS profile_profile_id,
+      profiles.name AS profile_name,
+      profiles.description AS profile_description
+    FROM users
+    LEFT JOIN profiles ON users.profile_id = profiles.profile_id
+  `);
+
+  return rows
+    .map((row) => {
+      return {
+        ...row,
+        profile: row.profile_profile_id
+          ? {
+              profile_id: row.profile_profile_id,
+              name: row.profile_name,
+              description: row.profile_description,
+            }
+          : null,
+      };
+    })
+    .map((row) => {
+      const {
+        profile_profile_id,
+        profile_name,
+        profile_description,
+        ...userData
+      } = row;
+      return userData;
+    });
 };
 
 const getUserById = async (id) => {
@@ -31,17 +54,44 @@ const getUserById = async (id) => {
 const getUserByUsername = async (username) => {
   const [rows] = await pool.query(
     `
-        SELECT 
-            users.*,
-            profiles.name as profile_name,
-            profiles.profile_id as profile_profile_id
-        FROM users
-        LEFT JOIN profiles ON users.profile_id = profiles.profile_id
-        WHERE users.user = ?
-    `,
+      SELECT 
+          users.*,
+          profiles.name as profile_name,
+          profiles.profile_id as profile_profile_id,
+            JSON_ARRAYAGG(
+              JSON_OBJECT(
+                'action_id', ua.action_id,
+                'name', ua.name
+              )
+            ) AS actions
+      FROM users
+      LEFT JOIN profiles ON users.profile_id = profiles.profile_id
+      LEFT JOIN profile_actions pa ON profiles.profile_id = pa.profile_id
+      LEFT JOIN user_actions ua ON pa.action_id = ua.action_id
+      WHERE users.user = ?
+      GROUP BY users.user_id
+  `,
     [username]
   );
-  return rows[0];
+
+  if (!rows || rows.length === 0) {
+    return null;
+  }
+
+  const row = rows[0];
+
+  let actions = row.actions;
+  if (actions && typeof actions === "string") {
+    actions = JSON.parse(actions);
+  }
+  return {
+    ...row,
+    actions: actions,
+    profile: {
+      profile_name: row.profile_name,
+      profile_profile_id: row.profile_profile_id,
+    },
+  };
 };
 
 const createUser = async (userData) => {

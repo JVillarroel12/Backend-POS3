@@ -40,6 +40,12 @@ const createUser = async (req, res) => {
     const newUser = await userService.createUser(req.body);
     res.status(201).json(newUser);
   } catch (error) {
+    if (
+      error.message ===
+      "El nombre de usuario ya está en uso. Por favor, elige otro nombre de usuario."
+    ) {
+      return res.status(400).json({ message: error.message });
+    }
     res.status(500).json({ error: error.message });
   }
 };

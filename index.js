@@ -6,6 +6,7 @@ const { initIO, getIO } = require("./socket");
 
 const app = express();
 
+const authRoutes = require("./src/routes/auth.routes");
 const categoriesRoutes = require("./src/routes/categories.routes");
 const productRoutes = require("./src/routes/products.routes");
 const clientRoutes = require("./src/routes/clients.routes");
@@ -30,6 +31,7 @@ app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use(express.json());
 
+app.use("/auth", authRoutes);
 app.use("/categories", categoriesRoutes);
 app.use("/products", productRoutes);
 app.use("/clients", clientRoutes);
@@ -46,6 +48,7 @@ app.use("/users", userRoutes);
 app.use("/profiles", profileRoutes);
 app.use("/user-actions", userActionRoutes);
 app.use("/profile-actions", profileActionRoutes);
+
 const server = http.createServer(app);
 initIO(server);
 
