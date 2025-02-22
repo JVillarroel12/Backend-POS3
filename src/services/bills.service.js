@@ -18,7 +18,11 @@ const createBill = async (billData) => {
 const updateBill = async (id, billData) => {
   return await Bill.updateBill(id, billData);
 };
+const updateBillsInvoiced = async (billIds) => {
+  console.log("BILLS IDS", billIds);
 
+  return await Bill.updateBillsInvoiced(billIds);
+};
 const deleteBill = async (id) => {
   return await Bill.deleteBill(id);
 };
@@ -29,5 +33,6 @@ module.exports = {
   getBillByClientId,
   createBill,
   updateBill,
+  updateBillsInvoiced,
   deleteBill,
 };

@@ -40,6 +40,8 @@ const createBill = async (req, res) => {
 };
 
 const updateBill = async (req, res) => {
+  console.log("aaaaaaaaaaaaaaa");
+
   try {
     const billId = parseInt(req.params.id);
     const updatedBill = await billService.updateBill(billId, req.body);
@@ -51,7 +53,23 @@ const updateBill = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+const updateBillsInvoiced = async (req, res) => {
+  console.log("REQ =>", req.body);
+  try {
+    const billIds = req.body;
+    console.log("REQ controller=>", req.body);
 
+    if (!Array.isArray(billIds)) {
+      return res.status(400).json({ message: "billIds must be an array" });
+    }
+
+    const updatedCount = await billService.updateBillsInvoiced(billIds);
+    res.json({ message: `${updatedCount} bills updated successfully` });
+  } catch (error) {
+    console.error("Error in updateBillsInvoiced controller", error);
+    res.status(500).json({ error: error.message });
+  }
+};
 const deleteBill = async (req, res) => {
   try {
     const billId = parseInt(req.params.id);
@@ -72,4 +90,5 @@ module.exports = {
   createBill,
   updateBill,
   deleteBill,
+  updateBillsInvoiced,
 };
