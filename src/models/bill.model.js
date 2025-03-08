@@ -2,16 +2,18 @@ const { pool } = require("../config/db");
 
 const getAllBills = async () => {
   const [rows] = await pool.query(`
-      SELECT 
-          b.*,
-          c.name AS client_name,
-          c.rif AS client_rif,
-          SUM(comandas.price * comandas.qty) AS total_price,
-          SUM(comandas.price_ref * comandas.qty) AS total_price_ref
-      FROM bills b
-      INNER JOIN clients c ON b.client_id = c.client_id
-      LEFT JOIN comandas ON b.bill_id = comandas.bill_id
-      GROUP BY b.bill_id
+    SELECT 
+      b.*,
+      c.name AS client_name,
+      c.rif AS client_rif,
+      COALESCE(SUM(comandas.price * comandas.qty), 0) + 
+      COALESCE((SELECT SUM(price * qty) FROM comanda_additionals WHERE comanda_id IN (SELECT comanda_id FROM comandas WHERE bill_id = b.bill_id)), 0) AS total_price,
+      COALESCE(SUM(comandas.price_ref * comandas.qty), 0) + 
+      COALESCE((SELECT SUM(price_ref * qty) FROM comanda_additionals WHERE comanda_id IN (SELECT comanda_id FROM comandas WHERE bill_id = b.bill_id)), 0) AS total_price_ref
+    FROM bills b
+    INNER JOIN clients c ON b.client_id = c.client_id
+    LEFT JOIN comandas ON b.bill_id = comandas.bill_id
+    GROUP BY b.bill_id, c.name, c.rif
   `);
 
   return rows

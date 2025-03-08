@@ -23,6 +23,7 @@ const userRoutes = require("./src/routes/users.routes");
 const profileRoutes = require("./src/routes/profiles.routes");
 const userActionRoutes = require("./src/routes/user_actions.routes");
 const profileActionRoutes = require("./src/routes/profile_actions.routes");
+const reportRoutes = require("./src/routes/reports.routes");
 
 const PORT = process.env.PORT || 3000;
 
@@ -48,6 +49,7 @@ app.use("/users", userRoutes);
 app.use("/profiles", profileRoutes);
 app.use("/user-actions", userActionRoutes);
 app.use("/profile-actions", profileActionRoutes);
+app.use("/reports", reportRoutes);
 
 const server = http.createServer(app);
 initIO(server);

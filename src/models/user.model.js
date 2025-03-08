@@ -58,19 +58,14 @@ const getUserByUsername = async (username) => {
           users.*,
           profiles.name as profile_name,
           profiles.profile_id as profile_profile_id,
-            JSON_ARRAYAGG(
-              JSON_OBJECT(
-                'action_id', ua.action_id,
-                'name', ua.name
-              )
-            ) AS actions
+          GROUP_CONCAT(ua.action_id, '||', ua.name SEPARATOR '&&') AS actions
       FROM users
       LEFT JOIN profiles ON users.profile_id = profiles.profile_id
       LEFT JOIN profile_actions pa ON profiles.profile_id = pa.profile_id
       LEFT JOIN user_actions ua ON pa.action_id = ua.action_id
       WHERE users.user = ?
       GROUP BY users.user_id
-  `,
+    `,
     [username]
   );
 
@@ -80,10 +75,17 @@ const getUserByUsername = async (username) => {
 
   const row = rows[0];
 
-  let actions = row.actions;
-  if (actions && typeof actions === "string") {
-    actions = JSON.parse(actions);
+  let actions = [];
+  if (row.actions) {
+    actions = row.actions.split("&&").map((action) => {
+      const [action_id, name] = action.split("||");
+      return {
+        action_id: parseInt(action_id),
+        name: name,
+      };
+    });
   }
+
   return {
     ...row,
     actions: actions,
