@@ -7,4 +7,5 @@ router.post(
   "/category-sales-products",
   reportController.getCategorySalesReportWithProducts
 );
+router.post("/sales-by-client", reportController.getClientSalesReport);
 module.exports = router;

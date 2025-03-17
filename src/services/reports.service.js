@@ -6,7 +6,11 @@ const getCategorySalesReport = async (startDate, endDate) => {
 const getCategorySalesReportWithProducts = async (startDate, endDate) => {
   return await Report.getCategorySalesReportWithProducts(startDate, endDate);
 };
+const getClientSalesReport = async (startDate, endDate) => {
+  return await Report.getClientSalesReport(startDate, endDate);
+};
 module.exports = {
   getCategorySalesReport,
   getCategorySalesReportWithProducts,
+  getClientSalesReport,
 };
